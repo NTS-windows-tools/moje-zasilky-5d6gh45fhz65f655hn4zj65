@@ -876,6 +876,22 @@
             const isOpen = window.openAccordions.has(key);
             const openClass = isOpen ? "open" : "";
 
+            // LOGIKA PRO ODKAZY NA SLEDOVÁNÍ
+            let trackingHtml = item.tracking;
+            const trackingMap = {
+                "Zásilkovna": "https://tracking.packeta.com/cs/PLACEHOLDER",
+                "Balíkovna": "https://www.balikovna.cz/cs/sledovat-balik/-/balik/PLACEHOLDER",
+                "DPD": "https://www.dpdgroup.com/cz/mydpd/my-parcels/incoming?parcelNumber=PLACEHOLDER",
+                "PPL": "https://www.ppl.cz/vyhledat-zasilku?shipmentId=PLACEHOLDER",
+                "Česká pošta": "https://www.postaonline.cz/trackandtrace/-/zasilka/cislo?parcelNumbers=PLACEHOLDER"
+            };
+
+            if (trackingMap[item.carrier]) {
+                const url = trackingMap[item.carrier].replace("PLACEHOLDER", item.tracking);
+                trackingHtml = `<a href="${url}" target="_blank" style="color: var(--primary-blue); text-decoration: underline;">${item.tracking}</a>`;
+            }
+            // KONEC LOGIKY ODKAZŮ
+
             div.innerHTML = `
                 <div class="shipment-header" onclick="app.toggleAccordion('${key}')">
                     <span>${item.name}</span>
@@ -886,7 +902,7 @@
                 </div>
                 <div id="details-${key}" class="shipment-details ${openClass}">
                     <div class="detail-row"><span class="detail-label">Dopravce:</span> ${item.carrier}</div>
-                    <div class="detail-row"><span class="detail-label">Číslo zásilky:</span> ${item.tracking}</div>
+                    <div class="detail-row"><span class="detail-label">Číslo zásilky:</span> ${trackingHtml}</div>
                     <div class="detail-row"><span class="detail-label">Příjemce:</span> ${item.recipient}</div>
                     <div class="detail-row"><span class="detail-label">Telefon:</span> ${item.phone}</div>
                     <div class="detail-row"><span class="detail-label">Doručení:</span> ${item.deliveryType} (${item.deliveryTarget})</div>
