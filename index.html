@@ -839,12 +839,40 @@
                 return;
             }
 
-            Object.entries(allShipmentsData).forEach(([key, item]) => {
+            // PŘIPRAVENÍ POLÍ PRO TŘÍDĚNÍ
+            const entries = Object.entries(allShipmentsData);
+            const activeItems = [];
+            const archivedItems = [];
+
+            entries.forEach(([key, item]) => {
                 if (item.archived) {
-                    archiveList.appendChild(createShipmentElement(key, item, true));
+                    archivedItems.push({ key: key, data: item });
                 } else {
-                    activeList.appendChild(createShipmentElement(key, item, false));
+                    activeItems.push({ key: key, data: item });
                 }
+            });
+
+            // TŘÍDĚNÍ ARCHIVU (datum formátu D.M.YYYY - sestupně, nejnovější nahoře)
+            archivedItems.sort((a, b) => {
+                const getDateVal = (dateStr) => {
+                    if (!dateStr) return 0;
+                    const parts = dateStr.split('.'); // Očekává formát D.M.YYYY
+                    if (parts.length < 3) return 0;
+                    // Měsíce v JS Date jsou 0-11, proto parts[1] - 1
+                    return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
+                };
+                // Seřadíme od největšího (nejnovějšího) po nejmenší (nejstarší)
+                return getDateVal(b.data.archivedDate) - getDateVal(a.data.archivedDate);
+            });
+
+            // VYKRESLENÍ AKTIVNÍCH (původní řazení)
+            activeItems.forEach(item => {
+                activeList.appendChild(createShipmentElement(item.key, item.data, false));
+            });
+
+            // VYKRESLENÍ ARCHIVNÍCH (seřazené)
+            archivedItems.forEach(item => {
+                archiveList.appendChild(createShipmentElement(item.key, item.data, true));
             });
         });
 
